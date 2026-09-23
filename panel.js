@@ -20,8 +20,8 @@
   }
 
   const bars = [
-    createBar('desktop', composer, true),
-    createBar('mobile', document.querySelector('.mobile-chat-actions'), true),
+    createBar('desktop', document.querySelector('.composer-tools'), true),
+    createBar('mobile', document.getElementById('mobile-quick-actions-slot') || document.querySelector('.mobile-chat-actions'), true),
     createBar('visual', document.getElementById('visual-chat')),
   ];
   const toast = document.createElement('div');
@@ -96,7 +96,7 @@
       bar.replaceChildren();
       bar.hidden = !available.length;
       if (!available.length) continue;
-      const compact = !bar.classList.contains('quick-actions-desktop-bar');
+      const compact = true;
       const menu = compact ? document.createElement('div') : bar;
       if (compact) {
         menu.className = 'quick-actions-menu';
@@ -116,7 +116,9 @@
           document.querySelectorAll('.quick-actions-menu').forEach(other => { other.hidden = true; });
           document.querySelectorAll('.quick-actions-menu-toggle').forEach(other => other.setAttribute('aria-expanded', 'false'));
           if (opening) {
-            menu.style.top = `${Math.round(toggle.getBoundingClientRect().bottom + 8)}px`;
+            if (!bar.closest('.mobile-quick-actions-slot') && !bar.classList.contains('quick-actions-desktop-bar')) {
+              menu.style.top = `${Math.round(toggle.getBoundingClientRect().bottom + 8)}px`;
+            }
             menu.hidden = false;
             toggle.setAttribute('aria-expanded', 'true');
           }

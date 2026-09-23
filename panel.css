@@ -200,8 +200,36 @@
 }
 
 .quick-actions-live-bar[hidden], #quick-actions-toast[hidden] { display: none !important; }
-.quick-actions-desktop-bar { margin-bottom: 10px; }
+.quick-actions-desktop-bar { position: relative; flex: 0 0 38px; width: 38px; overflow: visible; }
 .quick-actions-mobile-bar, .quick-actions-visual-bar { display: none; }
+
+.quick-actions-menu-toggle {
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: 17px;
+  cursor: pointer;
+}
+.quick-actions-desktop-bar .quick-actions-menu {
+  position: absolute;
+  z-index: 35;
+  left: 0;
+  bottom: calc(100% + 14px);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(150px, 1fr));
+  gap: 8px;
+  width: min(390px, calc(100vw - 40px));
+  padding: 10px;
+  border: 1px solid var(--accent-border);
+  border-radius: 15px;
+  background: var(--panel);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .4);
+}
+.quick-actions-desktop-bar .quick-actions-menu[hidden] { display: none !important; }
+.quick-actions-desktop-bar .quick-actions-menu .quick-actions-bar-button { min-width: 0; max-width: none; min-height: 46px; white-space: normal; }
 
 .quick-actions-live-bar .quick-actions-bar-button {
   flex: 0 0 auto;

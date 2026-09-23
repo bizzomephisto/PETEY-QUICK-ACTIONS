@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.0 — 2026-09-23
+
+- Move desktop actions into a compact composer menu beside the attachment control.
+- Place the mobile shortcut inside PETEY's collapsible bottom action dock.
+- Keep actions usable in Visual Mode while avoiding overlap with chat controls.
+
 ## v0.1.0 — 2026-09-22
 
 - Add four configurable quick-action buttons.

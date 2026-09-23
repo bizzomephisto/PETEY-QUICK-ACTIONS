@@ -24,7 +24,7 @@ Add up to four customizable buttons above PETEY's desktop chat composer and in c
 
 ## Install
 
-1. Download `petey-quick-actions-v0.1.0.zip` from the [latest release](https://github.com/bizzomephisto/PETEY-QUICK-ACTIONS/releases/latest).
+1. Download `petey-quick-actions-v0.2.0.zip` from the [latest release](https://github.com/bizzomephisto/PETEY-QUICK-ACTIONS/releases/latest).
 2. Extract the archive. It contains one folder named `quick-actions`.
 3. In PETEY, open **Add-ons** and select **Open add-ons folder**.
 4. Copy the complete `quick-actions` folder into that directory.

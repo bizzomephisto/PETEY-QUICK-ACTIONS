@@ -2,7 +2,7 @@
   "api_version": 1,
   "id": "quick-actions",
   "name": "Quick Actions",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Four customizable quick-action buttons above the chat input for text commands, tasks, and Home Assistant API calls.",
   "entrypoint": "addon.py",
   "panel": "panel.html",
