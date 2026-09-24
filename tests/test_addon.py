@@ -26,6 +26,7 @@ class QuickActionsTests(unittest.TestCase):
             app=self.app,
             addon_id="quick-actions",
             data_dir=Path(self.directory.name),
+            emit_event=Mock(),
         )
         self.addon = MODULE.setup(self.context)
         self.client = self.app.test_client()
@@ -59,7 +60,7 @@ class QuickActionsTests(unittest.TestCase):
         self.assertNotIn("secret-token", response.get_data(as_text=True))
         self.assertIn("secret-token", (Path(self.directory.name) / "config.json").read_text())
 
-    def test_text_command_is_returned_for_the_petey_composer(self):
+    def test_text_command_is_delivered_as_a_hidden_user_event(self):
         self.addon.update_buttons([{
             "id": "status",
             "label": "Status",
@@ -72,7 +73,18 @@ class QuickActionsTests(unittest.TestCase):
             json={"button_id": "status"},
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.get_json()["command"], "Give me a house status update.")
+        self.assertEqual(response.get_json()["status"], "queued")
+        self.context.emit_event.assert_called_once_with(
+            "Give me a house status update.",
+            surface="petey_desktop",
+            speak=True,
+            metadata={
+                "quick_action_id": "status",
+                "quick_action_label": "Status",
+                "quick_action_type": "text_command",
+            },
+            user_initiated=True,
+        )
 
     @patch.object(MODULE.requests, "post")
     def test_home_assistant_call_uses_saved_token_without_returning_it(self, request_post):
@@ -94,6 +106,9 @@ class QuickActionsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotIn("secret-token", response.get_data(as_text=True))
         request_post.assert_called_once()
+        self.context.emit_event.assert_called_once()
+        self.assertTrue(self.context.emit_event.call_args.kwargs["speak"])
+        self.assertFalse(self.context.emit_event.call_args.kwargs["user_initiated"])
         self.assertEqual(
             request_post.call_args.kwargs["headers"]["Authorization"],
             "Bearer secret-token",

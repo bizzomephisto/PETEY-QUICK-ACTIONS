@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.3.0 — 2026-09-23
+
+- Deliver saved commands and tasks through PETEY's hidden add-on event channel.
+- Keep button commands out of the visible chat feed while retaining PETEY's reply.
+- Request normal reply speech while respecting the client speaker mute setting.
+- Let PETEY briefly confirm successful direct Home Assistant actions.
+
 ## v0.2.0 — 2026-09-23
 
 - Move desktop actions into a compact composer menu beside the attachment control.

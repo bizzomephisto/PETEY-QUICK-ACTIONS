@@ -3,9 +3,6 @@
   const base = '/api/addons/quick-actions';
   let currentButtons = [];
   let feedbackTimer;
-  const composer = document.getElementById('composer');
-  const input = document.getElementById('message');
-  const send = document.getElementById('send');
 
   function createBar(name, parent, prepend = false) {
     const bar = document.createElement('div');
@@ -59,15 +56,10 @@
     return Boolean(button.command?.trim());
   }
 
-  function submitCommand(command) {
-    if (!command?.trim()) throw new Error('This quick action has no message.');
-    if (send.disabled) throw new Error('PETEY is busy. Try again when the reply finishes.');
-    if (input.value.trim()) throw new Error('Send or clear your draft before using a quick action.');
-    input.value = command;
+  function showChat() {
     if (document.getElementById('view-addon-quick-actions').classList.contains('active-view')) {
       document.querySelector('.nav-button[data-view="chat"]')?.click();
     }
-    composer.requestSubmit();
   }
 
   async function runButton(buttonId, trigger) {
@@ -76,13 +68,13 @@
       const result = await api('/execute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ button_id: buttonId }),
+        body: JSON.stringify({
+          button_id: buttonId,
+          surface: window.matchMedia('(max-width: 760px)').matches ? 'mobile_petey' : 'petey_desktop',
+        }),
       });
-      if (result.status === 'text_command' || result.status === 'task') {
-        submitCommand(result.command);
-      } else {
-        showFeedback(result.message || 'Quick action completed.', 'success');
-      }
+      showChat();
+      showFeedback(result.message || 'Quick action sent to PETEY.', 'success');
     } catch (error) {
       showFeedback(error.message, 'error');
     } finally {

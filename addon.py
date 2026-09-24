@@ -18,6 +18,7 @@ MAX_COMMAND_LENGTH = 500
 MAX_URL_LENGTH = 2048
 MAX_TOKEN_LENGTH = 4096
 VALID_ACTION_TYPES = ("text_command", "task", "home_assistant")
+VALID_SURFACES = ("petey_desktop", "mobile_petey")
 
 
 class QuickActionsError(ValueError):
@@ -101,6 +102,7 @@ class QuickActionsAddon:
     def __init__(self, context):
         self._data_dir = Path(context.data_dir)
         self._config_path = self._data_dir / "config.json"
+        self._emit_event = context.emit_event
         self._lock = threading.RLock()
         self._buttons = self._load()
 
@@ -206,8 +208,11 @@ class QuickActionsAddon:
             self._save()
             return self.public_state()
 
-    def execute_button(self, button_id: str) -> dict:
-        """Execute a button's action and return the result."""
+    def execute_button(self, button_id: str, *, surface: str = "petey_desktop") -> dict:
+        """Execute a button without exposing its command as a user chat message."""
+        if surface not in VALID_SURFACES:
+            raise QuickActionsError("Quick Actions received an invalid PETEY surface.")
+
         with self._lock:
             button = next((b for b in self._buttons if b["id"] == button_id), None)
             if not button:
@@ -220,25 +225,45 @@ class QuickActionsAddon:
             if action_type == "text_command":
                 if not button.get("command"):
                     raise QuickActionsError(f"Set a message for '{button['label']}' first.")
-                return {
-                    "status": "text_command",
-                    "command": button.get("command", ""),
-                    "message": f"Text command ready: {button['label']}",
-                }
+                prompt = button["command"]
 
             elif action_type == "task":
                 if not button.get("command"):
                     raise QuickActionsError(f"Set a task for '{button['label']}' first.")
-                return {
-                    "status": "task",
-                    "command": button.get("command", ""),
-                    "message": f"Task ready: {button['label']}",
-                }
+                prompt = button["command"]
 
             elif action_type == "home_assistant":
-                return self._execute_home_assistant(button)
+                result = self._execute_home_assistant(button)
+                prompt = (
+                    f"Quick Action '{button['label']}' completed successfully. "
+                    f"{result['message']} Briefly confirm the result to the user."
+                )
 
-            raise QuickActionsError(f"Unknown action type: {action_type}")
+            else:
+                raise QuickActionsError(f"Unknown action type: {action_type}")
+
+            try:
+                self._emit_event(
+                    prompt,
+                    surface=surface,
+                    speak=True,
+                    metadata={
+                        "quick_action_id": str(button["id"]),
+                        "quick_action_label": str(button["label"]),
+                        "quick_action_type": str(action_type),
+                    },
+                    user_initiated=action_type in {"text_command", "task"},
+                )
+            except Exception as exc:
+                if action_type == "home_assistant":
+                    raise QuickActionsError(
+                        "The Home Assistant action completed, but PETEY could not queue its confirmation."
+                    ) from exc
+                raise QuickActionsError("Could not send this Quick Action to PETEY.") from exc
+            return {
+                "status": "queued",
+                "message": f"{button['label']} sent to PETEY.",
+            }
 
     def _execute_home_assistant(self, button: dict) -> dict:
         """Execute a Home Assistant API call."""
@@ -323,7 +348,8 @@ def setup(context):
         payload = request.get_json(silent=True)
         if not isinstance(payload, dict) or "button_id" not in payload:
             return jsonify({"error": "Expected a JSON object with a 'button_id' field."}), 400
-        return safely(lambda: addon.execute_button(payload["button_id"]))
+        surface = payload.get("surface", "petey_desktop")
+        return safely(lambda: addon.execute_button(payload["button_id"], surface=surface))
 
     routes = (
         ("/state", "state", ["GET"], get_state),
