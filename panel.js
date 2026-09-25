@@ -3,6 +3,10 @@
   const base = '/api/addons/quick-actions';
   let currentButtons = [];
   let feedbackTimer;
+  let railActionRemovers = [];
+  const runningButtons = new Set();
+  const mobileViewport = window.matchMedia('(max-width: 760px)');
+  const railAddonSection = document.querySelector('[data-command-section="addons"]');
 
   function createBar(name, parent, prepend = false) {
     const bar = document.createElement('div');
@@ -62,8 +66,10 @@
     }
   }
 
-  async function runButton(buttonId, trigger) {
-    trigger.disabled = true;
+  async function runButton(buttonId, trigger = null) {
+    if (runningButtons.has(buttonId)) return;
+    runningButtons.add(buttonId);
+    if (trigger) trigger.disabled = true;
     try {
       const result = await api('/execute', {
         method: 'POST',
@@ -78,16 +84,46 @@
     } catch (error) {
       showFeedback(error.message, 'error');
     } finally {
-      trigger.disabled = false;
+      runningButtons.delete(buttonId);
+      if (trigger) trigger.disabled = false;
     }
+  }
+
+  function commandRailEnabled() {
+    return !mobileViewport.matches
+      && document.documentElement.dataset.commandRail !== 'disabled'
+      && !railAddonSection?.hidden
+      && typeof window.peteyInterface?.registerAction === 'function';
+  }
+
+  function clearRailActions() {
+    for (const remove of railActionRemovers) remove();
+    railActionRemovers = [];
+  }
+
+  function registerRailActions(buttons) {
+    clearRailActions();
+    if (!commandRailEnabled()) return false;
+    railActionRemovers = buttons.map(button => window.peteyInterface.registerAction({
+      id: `quick-actions-${button.id}`,
+      label: button.label,
+      icon: button.icon || '⚡',
+      onClick: () => runButton(button.id),
+    }));
+    return true;
   }
 
   function renderLiveBars(buttons) {
     const available = buttons.filter(isConfigured);
+    const usingRail = registerRailActions(available);
     for (const bar of bars) {
       bar.replaceChildren();
-      bar.hidden = !available.length;
-      if (!available.length) continue;
+      bar._closeMenu = null;
+      const desktopFallback = bar.classList.contains('quick-actions-desktop-bar');
+      const visualDesktopFallback = bar.classList.contains('quick-actions-visual-bar') && !mobileViewport.matches;
+      const hiddenByRail = usingRail && (desktopFallback || visualDesktopFallback);
+      bar.hidden = !available.length || hiddenByRail;
+      if (!available.length || hiddenByRail) continue;
       const compact = true;
       const menu = compact ? document.createElement('div') : bar;
       if (compact) {
@@ -140,7 +176,22 @@
       bar._closeMenu();
     }
   });
+  function syncPlacement() {
+    bars.forEach(bar => bar._closeMenu?.());
+    renderLiveBars(currentButtons);
+  }
+
   window.addEventListener('resize', () => bars.forEach(bar => bar._closeMenu?.()));
+  mobileViewport.addEventListener('change', syncPlacement);
+  window.addEventListener('petey:interface-ready', syncPlacement);
+  const placementObserver = new MutationObserver(syncPlacement);
+  placementObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-command-rail'],
+  });
+  if (railAddonSection) {
+    placementObserver.observe(railAddonSection, {attributes: true, attributeFilter: ['hidden']});
+  }
 
   function renderButtonConfig(button, index) {
     const card = document.createElement('div');

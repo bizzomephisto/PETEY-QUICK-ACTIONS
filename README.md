@@ -4,7 +4,7 @@
 [![Release](https://img.shields.io/github/v/release/bizzomephisto/PETEY-QUICK-ACTIONS)](https://github.com/bizzomephisto/PETEY-QUICK-ACTIONS/releases/latest)
 [![Tests](https://github.com/bizzomephisto/PETEY-QUICK-ACTIONS/actions/workflows/test.yml/badge.svg)](https://github.com/bizzomephisto/PETEY-QUICK-ACTIONS/actions/workflows/test.yml)
 
-Add up to four customizable buttons beside PETEY's desktop chat composer and in compact mobile and Visual Mode menus. Button commands stay hidden while PETEY's response appears in chat and follows the normal speaker mute setting.
+Add up to four customizable actions to PETEY's Command Center rail and compact chat controls. Button commands stay hidden while PETEY's response appears in chat and follows the normal speaker mute setting.
 
 ## Features
 
@@ -13,6 +13,7 @@ Add up to four customizable buttons beside PETEY's desktop chat composer and in 
 - Call a configured Home Assistant service directly, then have PETEY confirm it.
 - Speak PETEY's response when the current client is not muted.
 - Show only configured, enabled buttons.
+- Use the desktop Command Center rail when its Add-on controls are enabled and restore the composer menu when they are hidden or the rail is disabled.
 - Keep mobile controls compact inside a single lightning menu.
 - Store configuration privately in PETEY's add-on data folder.
 - Never return saved Home Assistant tokens through the add-on API.
@@ -25,7 +26,7 @@ Add up to four customizable buttons beside PETEY's desktop chat composer and in 
 
 ## Install
 
-1. Download `petey-quick-actions-v0.3.0.zip` from the [latest release](https://github.com/bizzomephisto/PETEY-QUICK-ACTIONS/releases/latest).
+1. Download `petey-quick-actions-v0.4.0.zip` from the [latest release](https://github.com/bizzomephisto/PETEY-QUICK-ACTIONS/releases/latest).
 2. Extract the archive. It contains one folder named `quick-actions`.
 3. In PETEY, open **Add-ons** and select **Open add-ons folder**.
 4. Copy the complete `quick-actions` folder into that directory.
@@ -43,7 +44,7 @@ Open PETEY's **Quick Actions** add-on screen. Each button supports a label, icon
 
 Quick Actions never insert their saved command into the visible feed. PETEY's response is saved in the active conversation and appears on connected clients. Automatic speech uses the same speaker mute control as an ordinary chat response.
 
-Save each button after editing it. A configured button appears above the desktop composer. On mobile chat and Visual Mode, select the lightning button to open the compact action menu.
+Save each button after editing it. On desktop, configured buttons appear under **Add-on controls** in the Command Center rail. The rail may be open or collapsed; if it or its Add-on controls are disabled in Appearance settings, Quick Actions restores its lightning menu beside the composer. On mobile chat and Visual Mode, select the lightning button to open the compact action menu.
 
 ## Home Assistant actions
 

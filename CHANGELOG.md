@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.4.0 — 2026-09-24
+
+- Put configured desktop actions in PETEY's Command Center rail when the rail is enabled.
+- Restore the existing composer and Visual Mode lightning menus when the rail or its Add-on controls are disabled.
+- React immediately to rail preference and desktop/mobile viewport changes without restarting PETEY.
+- Prevent repeated clicks from sending the same action more than once while it is running.
+
 ## v0.3.0 — 2026-09-23
 
 - Deliver saved commands and tasks through PETEY's hidden add-on event channel.
