@@ -105,6 +105,7 @@
     clearRailActions();
     if (!commandRailEnabled()) return false;
     railActionRemovers = buttons.map(button => window.peteyInterface.registerAction({
+      addonId: 'quick-actions',
       id: `quick-actions-${button.id}`,
       label: button.label,
       icon: button.icon || '⚡',
